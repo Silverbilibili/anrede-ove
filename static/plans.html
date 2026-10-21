@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>购买清单 · 串关对冲方案 · 足球对冲 P0</title>
+<style>
+:root{
+  --bg:#f4f6fa; --panel:#fff; --line:#e5e9f0; --line2:#eef1f6;
+  --txt:#1f2937; --muted:#6b7280; --muted2:#9ca3af;
+  --accent:#2563eb; --accent-bg:#eff6ff;
+  --good:#16a34a; --good-bg:#f0fdf4;
+  --warn:#d97706; --warn-bg:#fffbeb;
+  --bad:#dc2626; --bad-bg:#fef2f2;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;font-size:13px;line-height:1.5}
+.topbar{height:52px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 16px;gap:12px;position:sticky;top:0;z-index:30}
+.logo{width:28px;height:28px;background:linear-gradient(135deg,#2563eb,#7c3aed);border-radius:6px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.crumb{font-size:13px;color:var(--muted)} .crumb b{color:var(--txt)}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:#10b981;display:inline-block;margin-right:4px}
+.wrap{max-width:1060px;margin:18px auto;padding:0 16px}
+/* 头部 */
+.head{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.head h1{font-size:20px;margin:0;color:#0f172a}
+.tabs{display:flex;gap:6px;margin-left:auto}
+.tab{padding:7px 14px;border:1px solid var(--line);border-radius:7px;background:#fff;cursor:pointer;font-size:12.5px;color:var(--muted)}
+.tab:hover{color:var(--accent)}
+.tab.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+/* 信息条 */
+.banner{background:var(--accent-bg);border:1px solid #bfdbfe;color:#1d4ed8;padding:9px 13px;border-radius:8px;font-size:12.5px;margin-bottom:14px}
+.banner.warn{background:var(--warn-bg);border-color:#fde68a;color:#92400e}
+/* 方案卡片 */
+.plan{background:#fff;border:1px solid var(--line);border-radius:10px;margin-bottom:16px;overflow:hidden}
+.plan-head{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line2);flex-wrap:wrap}
+.plan-title{font-size:15px;font-weight:700;color:#0f172a}
+.tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:10px;background:var(--line2);color:var(--muted)}
+.tag.good{background:#dcfce7;color:#15803d}
+.tag.warn{background:#fef3c7;color:#92400e}
+.plan-meta{font-size:12px;color:var(--muted);margin-left:auto;display:flex;gap:14px;flex-wrap:wrap}
+.plan-meta b{color:var(--txt)}
+/* 清单主体 */
+.list-body{padding:10px 16px 14px}
+.bet{display:flex;gap:12px;padding:12px 4px;border-bottom:1px dashed var(--line2);flex-wrap:wrap}
+.bet:last-child{border-bottom:none}
+.bet-idx{flex:0 0 30px;height:30px;background:var(--accent-bg);color:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.bet-main{flex:1;min-width:260px}
+.bet-line{font-weight:700;font-size:13.5px}
+.bet-line small{font-weight:400;color:var(--muted);font-size:11.5px;margin-left:6px}
+.bet-leg{margin-top:5px;font-size:12.5px;color:#374151}
+.bet-leg .odds{color:var(--accent);font-weight:700}
+.bet-leg .code{display:inline-block;background:var(--accent-bg);color:var(--accent);border-radius:4px;padding:0 5px;font-size:11.5px;margin-right:4px}
+.bet-amount{flex:0 0 130px;text-align:right}
+.bet-amount .amt{font-size:16px;font-weight:800;color:#0f172a}
+.bet-amount .lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.parlay-total{background:#f8fafc;border:1px solid var(--line2);border-radius:8px;padding:8px 12px;font-size:12.5px;color:#334155;margin-top:10px}
+.parlay-total b{color:var(--accent)}
+/* 底部结果 */
+.plan-foot{display:flex;gap:0;border-top:1px solid var(--line2);background:#fafbfd}
+.pnl-box{flex:1;padding:12px 16px;text-align:center}
+.pnl-box+.pnl-box{border-left:1px solid var(--line2)}
+.pnl-box .k{font-size:11px;color:var(--muted)}
+.pnl-box .v{font-size:19px;font-weight:800;margin-top:3px}
+.v.pos{color:var(--good)} .v.neg{color:var(--bad)} .v.zero{color:#64748b}
+.pnl-note{font-size:10.5px;color:var(--muted2);margin-top:3px;line-height:1.4}
+/* 状态矩阵 */
+.states{margin-top:12px}
+.states summary{font-size:12.5px;color:var(--muted);cursor:pointer;padding:4px 0;user-select:none}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:6px}
+th{background:#fafbfd;text-align:left;padding:7px 9px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line)}
+td{padding:7px 9px;border-bottom:1px solid var(--line2)}
+td.pnl{text-align:right;font-weight:700}
+td.worst{background:#fef2f2;color:var(--bad)}
+td.win{background:#f0fdf4;color:var(--good)}
+.empty{background:#fff;border:1px dashed #cbd5e1;border-radius:10px;padding:26px;text-align:center;color:var(--muted)}
+.empty .big{font-size:15px;color:#334155;margin-bottom:6px}
+.btn{border:1px solid var(--line);background:#fff;padding:7px 14px;border-radius:7px;cursor:pointer;font-size:12.5px;color:var(--txt);margin-top:10px}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.demo{background:#fef3c7;border-color:#f59e0b;color:#92400e;font-weight:600}
+.foot-note{color:var(--muted2);font-size:11px;text-align:center;margin:14px 0 24px;line-height:1.7}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="logo">对</div>
+  <div class="crumb"><b>购买清单 · 串关对冲方案</b> <span style="color:#94a3b8">/ 足球对冲 P0</span></div>
+  <div class="top-right"><span class="dot"></span><span id="src-state">加载中…</span><span id="clock">--:--:--</span></div>
+</div>
+<div class="wrap">
+  <div class="head">
+    <h1>模拟购买清单 · 全部平台</h1>
+    <div class="tabs">
+      <a class="tab" href="/">单关机会中心</a>
+      <div class="tab active" data-view="parlay2">2串1 方案</div>
+      <div class="tab" data-view="parlay3">3串1 方案</div>
+      <div class="tab" data-view="single">单关对冲</div>
+    </div>
+  </div>
+  <div class="banner" id="banner">加载真实方案数据…</div>
+  <div id="view"></div>
+  <div class="foot-note">系统生成的模拟购买清单，不是官方出票凭证。待买前须在网页核对最新报价和购买状态；上述盈亏针对完整方案，未买齐时不能视为当前已购结果。</div>
+</div>
+<script>
+const CN = {HOME:"主胜",DRAW:"平局",AWAY:"客胜"};
+let ALL = null, view = "parlay2";
+
+async function loadReal(){
+  demoMode = false;
+  try{
+    const r = await fetch("/api/v1/plans/all").then(r=>r.json());
+    ALL = r;
+    document.getElementById("src-state").textContent = `已连接真实数据 · ${r.matches_pool||0} 场 / ${r.plan_count||0} 方案`;
+    document.getElementById("banner").className = "banner";
+    document.getElementById("banner").textContent = `真实数据：当前 ${r.matches_pool||0} 场跨端比赛 · 生成 ${r.plan_count||0} 个串关方案（2串1/3串1）`;
+    render();
+  }catch(e){
+    document.getElementById("banner").className = "banner warn";
+    document.getElementById("banner").textContent = "后端未启动或无数据。";
+  }
+}
+
+const DEMO = {
+  budget:"1000", matches_pool:2, plan_count:2,
+  plans:[{
+    plan_id:"P2_demo", status:"SOLVED", type:"PARLAY2",
+    structure:"TC 2串1 + 2 场 HG 受让单关（五态）",
+    matches:[{home:"布莱顿",away:"阿森纳"},{home:"皇家贝蒂斯",away:"塞维利亚"}],
+    parlay:{selections:[["HOME"],["HOME"]],combos:"1×1",stake:"2",multiplier:1,
+      unit_prize_min:"8.00",return_on_hit_min:"8.00",
+      legs:[{match:"布莱顿 vs 阿森纳",picks:["HOME"],odds:{HOME:"2.03"}},{match:"皇家贝蒂斯 vs 塞维利亚",picks:["HOME"],odds:{HOME:"1.97"}}]},
+    hedges:[
+      {match:"布莱顿 vs 阿森纳",hedge:"AWAY",line:"-0.5",odds:"2.53",stake:"3"},
+      {match:"皇家贝蒂斯 vs 塞维利亚",hedge:"AWAY",line:"-0.5",odds:"2.49",stake:"3"}],
+    total_stake:"8",sum_inv:"1.0469",arbitrage:false,
+    rebate:{tc:"0.10",hg:"0.03",total:"0.13"},
+    tax_note:"单期中奖合计>1万按20%偶然所得税（V1 R20 聚合口径）",
+    worst_pnl:"-0.40",worst_roi:"-5.00",coverage:"COMPLETE",
+    states:[
+      {pnl:"0.13",count:1,coverage:[{gd:[1,1],result:["HOME","HOME"],state:"布莱顿 赢(+1) × 皇家贝蒂斯 赢(+1)"}]},
+      {pnl:"-0.40",count:4,coverage:[{gd:[1,0],result:["HOME","DRAW"],state:"布莱顿 赢(+1) × 皇家贝蒂斯 平(0)"}]},
+      {pnl:"-0.28",count:2,coverage:[{gd:[0,1],result:["DRAW","HOME"],state:"布莱顿 平(0) × 皇家贝蒂斯 赢(+1)"}]},
+      {pnl:"15.19",count:2,coverage:[{gd:[0,0],result:["DRAW","DRAW"],state:"布莱顿 平(0) × 皇家贝蒂斯 平(0)"}]}]
+  },{
+    plan_id:"P3_demo", status:"SOLVED", type:"PARLAY3",
+    structure:"TC 3串1 + 3 场 HG 受让单关（五态）",
+    matches:[{home:"布莱顿",away:"阿森纳"},{home:"皇家贝蒂斯",away:"塞维利亚"},{home:"曼城",away:"曼联"}],
+    parlay:{selections:[["HOME"],["HOME"],["HOME"]],combos:"1×1×1",stake:"2",multiplier:1,
+      unit_prize_min:"16.00",return_on_hit_min:"16.00",
+      legs:[{match:"布莱顿 vs 阿森纳",picks:["HOME"],odds:{HOME:"2.03"}},{match:"皇家贝蒂斯 vs 塞维利亚",picks:["HOME"],odds:{HOME:"1.97"}},{match:"曼城 vs 曼联",picks:["HOME"],odds:{HOME:"2.00"}}]},
+    hedges:[
+      {match:"布莱顿 vs 阿森纳",hedge:"AWAY",line:"-0.5",odds:"2.53",stake:"6"},
+      {match:"皇家贝蒂斯 vs 塞维利亚",hedge:"AWAY",line:"-0.5",odds:"2.49",stake:"6"},
+      {match:"曼城 vs 曼联",hedge:"AWAY",line:"-0.5",odds:"1.95",stake:"8"}],
+    total_stake:"22",sum_inv:"1.0320",arbitrage:false,
+    rebate:{tc:"0.10",hg:"0.10",total:"0.20"},
+    tax_note:"单期中奖合计>1万按20%偶然所得税（V1 R20 聚合口径）",
+    worst_pnl:"-5.80",worst_roi:"-26.36",coverage:"COMPLETE",
+    states:[{pnl:"-5.80",count:8,coverage:[{gd:[1,1,1],result:["HOME","HOME","HOME"],state:"布莱顿 赢(+1) × 皇家贝蒂斯 赢(+1) × 曼城 赢(+1)"}]},
+      {pnl:"9.40",count:19,coverage:[{gd:[0,1,1],result:["DRAW","HOME","HOME"],state:"布莱顿 平(0) × 皇家贝蒂斯 赢(+1) × 曼城 赢(+1)"}]}]
+  }]
+};
+
+function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+
+function render(){
+  if(view==="single"){ renderSingle(); return; }
+  const data = ALL || DEMO;
+  const plans = (data.plans||[]).filter(p=>p.type===(view==="parlay3"?"PARLAY3":"PARLAY2"));
+  const el = document.getElementById("view");
+  if(!plans.length){
+    el.innerHTML = `<div class="empty">
+      <div class="big">当前没有可生成的 ${view==="parlay2"?"2串1":"3串1"} 方案</div>
+      ${(data.plans||[]).length?`原因：库内跨端比赛没有可用数据。`:`原因：HG 侧暂无可用受让半球盘数据（四分之一盘/整数盘暂不支持）<br/>有真实方案数据后会自动出现；也可以先看演示效果。`}
+      ${(!(data.plans||[]).length)?`<button class="btn demo" onclick="loadDemo()">载入演示方案（模板数据）</button>`:""}
+    </div>`;
+    return;
+  }
+  el.innerHTML = plans.map((p,i)=>planCard(p,i)).join("");
+}
+
+function loadDemo(){
+  demoMode = true;
+  ALL = null;
+  document.getElementById("src-state").textContent = "演示数据 · 模板效果";
+  document.getElementById("banner").className = "banner warn";
+  document.getElementById("banner").textContent = "演示模式：布莱顿 vs 阿森纳 × 皇家贝蒂斯 vs 塞维利亚（模板数据），展示购买清单样式与完整覆盖结构。";
+  render();
+}
+
+function planCard(p, idx){
+  const pl = p.parlay;
+  const bets = [];
+  const fieldChar = ["A场","B场","C场","D场"];
+  const vs = (p.matches||[]).map(m=>`${esc(m.home)} vs ${esc(m.away)}`).join(" × ");
+  const legsHtml = pl.legs.map((l,i)=>`
+    <div class="bet-leg">${fieldChar[i]||i+"场"} ${esc(l.match)} · 全场胜平负·复式选 <span class="code">${l.picks.map(c=>CN[c]||c).join(" / ")}</span> · 赔率 <span class="odds">${l.picks.map(c=>l.odds[c]).join(" / ")}</span></div>`).join("");
+  bets.push({idx:1, platform:"体彩", type:`${p.type==="PARLAY2"?"2串1":"3串1"}（${pl.legs.length}场复式 ${pl.combos} · ${pl.multiplier}倍×2元 合成一张票）`, legs:legsHtml,
+             total:`组合 ${pl.combos} · 单注奖金下限 ¥${Number(pl.unit_prize_min).toFixed(2)} × ${pl.multiplier}倍 = 命中返还下限 ¥${Number(pl.return_on_hit_min).toFixed(2)}`, amount:pl.stake});
+  p.hedges.forEach((h,i)=>{
+    const hv = h.hedge==="AWAY" ? -Number(h.line) : Number(h.line);
+    bets.push({idx:i+2, platform:"皇冠", type:"单关 · 受让对冲（五态结算）", legs:`
+      <div class="bet-leg">${fieldChar[i]} ${esc(h.match)} · 全场让球·<span class="code">${h.hedge==="AWAY"?"客受让":"主受让"} ${hv>0?"+":""}${hv}</span> · 赔率 <span class="odds">${h.odds}</span></div>`,
+      total:`单关赔率 ${h.odds}`, amount:h.stake});
+  });
+  const pnl = Number(p.worst_pnl);
+  const pnlCls = pnl>0?"pos":(pnl===0?"zero":"neg");
+  const worst = Math.min(...(p.states||[]).map(x=>Number(x.pnl)));
+  const stateRows = (p.states||[]).map(s=>{
+    const v=Number(s.pnl);
+    const cls = v===worst?"worst":(v>0?"win":"");
+    const cover = (s.coverage||[]).map(c=>c.state).slice(0,1).join("");
+    const extra = s.count>1?`<small class="muted">（${s.count} 个净胜球桶同盈亏）</small>`:"";
+    return `<tr><td>${esc(cover||s.state||"")} ${extra}</td><td class="pnl ${cls}">${v>=0?"+":""}${v.toFixed(2)}</td></tr>`;
+  }).join("");
+  return `<div class="plan">
+    <div class="plan-head">
+      <div class="plan-title">方案 ${idx!=null?idx+1:""} · ${vs} · ${p.type==="PARLAY2"?"复式2串1 + 两场受让对冲":"复式3串1 + 三场受让对冲"}</div>
+      <span class="tag ${p.arbitrage?"good":"warn"}">${p.arbitrage?"完美套利":"无套利 · 不建议购买"}</span>
+      <span class="tag good">覆盖${p.coverage}</span>
+      ${p.version?`<span class="tag" style="background:#1e293b;color:#93c5fd;border:1px solid #334155;">方案 V${p.version}${p.plan_cached?"（报价未变）":""}</span>`:""}
+      <div class="plan-meta">
+        <span>总投入 <b>¥${Number(p.total_stake).toFixed(2)}</b> / 预算上限 ¥${Number(DEMO.budget).toFixed(2)}</span>
+        <span>参数 <b>S1</b></span>
+        <span>本清单合计 <b>¥${Number(p.total_stake).toFixed(2)}</b></span>
+      </div>
+    </div>
+    <div class="list-body">
+      ${bets.map((b,i)=>`<div class="bet">
+        <div class="bet-idx">${b.idx}</div>
+        <div class="bet-main">
+          <div class="bet-line">第${"一二三"[i]}笔 · ${b.platform} · ${b.type} · 待购买<small>${i===0?"锚点投注":"对冲投注"}</small></div>
+          ${b.legs}
+          <div class="parlay-total">${b.total}</div>
+        </div>
+        <div class="bet-amount"><div class="amt">¥${Number(b.amount).toFixed(2)}</div><div class="lbl">购买金额</div></div>
+      </div>`).join("")}
+      <div class="states"><details>
+        <summary>▾ 逐状态盈亏矩阵（${(p.states||[]).length} 类净盈亏 · 按净胜球桶精确结算）</summary>
+        <table><thead><tr><th>赛果组合</th><th style="width:130px">净盈亏</th></tr></thead>
+        <tbody>${stateRows}</tbody></table>
+      </details></div>
+      ${p.limits?`
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 10px;margin:8px 0;font-size:12px">
+        <b style="color:#334155">投注限制核算</b>
+        <table style="width:100%;border-collapse:collapse;margin-top:4px">
+          <thead><tr style="color:#64748b;font-size:11px;text-align:left">
+            <th style="padding:3px 6px">腿</th><th style="padding:3px 6px">金额</th>
+            <th style="padding:3px 6px">限制（最小/步长/最大/注数）</th><th style="padding:3px 6px">合规</th></tr></thead>
+          <tbody>
+            <tr><td style="padding:3px 6px">TC 串关</td>
+              <td style="padding:3px 6px">¥${p.limits.tc_leg.stake}</td>
+              <td style="padding:3px 6px">单张≤${p.limits.tc_leg.max_notes}注 · 倍数≤${p.limits.tc_leg.max_multiplier} · 单张≤¥${p.limits.tc_leg.max_ticket_amount}（当前${p.limits.tc_leg.notes}注）</td>
+              <td style="padding:3px 6px">${p.limits.tc_leg.notes_compliant&&p.limits.tc_leg.amount_compliant?'<span style="color:#166534">合规</span>':'<span style="color:#b91c1c">超限</span>'}</td></tr>
+            ${(p.limits.hedge_legs||[]).map((h,i)=>`<tr><td style="padding:3px 6px">受让腿 ${i+1}</td>
+              <td style="padding:3px 6px">¥${h.stake}</td>
+              <td style="padding:3px 6px">最小 ${h.min} · 步长 ${h.step} · 最大 ${h.max}</td>
+              <td style="padding:3px 6px">${h.compliant?'<span style="color:#166534">合规</span>':'<span style="color:#b91c1c">超限</span>'}</td></tr>`).join("")}
+          </tbody>
+        </table>
+        <div style="color:#94a3b8;font-size:11px;margin-top:3px">规则来自 config/sources.json limits；TC 单注2元/2元步长/99倍，外围最小注/最大注/步长。实际以平台为准。</div>
+      </div>`:""}
+    </div>
+    <div class="plan-foot">
+      <div class="pnl-box"><div class="k">完整方案最差净盈亏</div>
+        <div class="v ${pnlCls}">${pnl>=0?"+":""}${pnl.toFixed(2)} 元</div>
+        <div class="pnl-note">买齐后按此快照 · 最差赛果下</div></div>
+      <div class="pnl-box"><div class="k">最差收益率</div>
+        <div class="v ${pnlCls}">${Number(p.worst_roi).toFixed(2)}%</div>
+        <div class="pnl-note">Σ(1/赔率)=${p.sum_inv} ${p.arbitrage?"&lt;1 完美套利：所有赛果都赚":"≥1 非套利：最差赛果亏损，不建议购买"}</div></div>
+      <div class="pnl-box" style="min-width:180px"><div class="k">返点（已计入净盈亏）</div>
+        <div class="v" style="color:#166534">+${Number(p.rebate?p.rebate.total:0).toFixed(2)} 元</div>
+        <div class="pnl-note">体彩 5%（V1 R19）+ 皇冠 0.5% · 按实际投注额</div></div>
+      <div class="pnl-box" style="min-width:180px"><div class="k">税务提示</div>
+        <div class="pnl-note">单期中奖合计&gt;1万按 20% 偶然所得税（V1 R20，需同一人同期同游戏聚合上下文）</div></div>
+    </div>
+  </div>`;
+}
+
+let demoMode = false;
+let singleData = null;
+
+async function loadSingle(){
+  try{
+    const r = await fetch("/api/v1/opportunities?limit=100").then(r=>r.json());
+    singleData = r;
+    renderSingle();
+  }catch(e){ /* 后端未启动时保持空 */ }
+}
+
+function renderSingle(){
+  const el = document.getElementById("view");
+  const opps = (singleData||[]).filter(o=>
+    o.result && o.result.market_type==="MATCH_RESULT" && (o.coverage_status||o.result.coverage_status)==="COMPLETE");
+  if(!opps.length){
+    el.innerHTML = `<div class="empty">
+      <div class="big">当前没有单场全覆盖方案</div>
+      单场三选全覆盖：把 主胜/平/客胜 买齐，任意赛果返还相同。<br/>
+      成立条件 Σ(1/赔率) &lt; 1 —— 现在两端价差合计 ≥ 1（庄家抽水），数学上不存在"怎么买都不亏"。<br/>
+      两端报价变化时系统自动重算，出现机会会自动出现在这里。也可以点「载入演示数据」看清单样式。
+    </div>`;
+    return;
+  }
+  el.innerHTML = opps.map(o=>{
+    const r = o.result;
+    const pnl = Number(o.min_pnl ?? r.min_pnl);
+    const pnlCls = pnl>0?"pos":(pnl===0?"zero":"neg");
+    const CN2 = {HOME:"主胜",DRAW:"平局",AWAY:"客胜",OVER:"大球",UNDER:"小球"};
+    const PLAT = {TC:"体彩",DAFABET:"皇冠",HG:"皇冠"};
+    const bets = (r.stake_plan||[]).map((st,i)=>`
+      <div class="bet">
+        <div class="bet-idx">${i+1}</div>
+        <div class="bet-main">
+          <div class="bet-line">${PLAT[st.source]||st.source} · 单关 · ${CN2[st.selection_code]||st.selection_code} · 待购买<small>${i===0?"锚点投注":"对冲投注"}</small></div>
+          <div class="bet-leg">${esc(o.home_team||"")} vs ${esc(o.away_team||"")} · 赔率 <span class="odds">${Number(st.odds||st.odds_decimal).toFixed(2)}</span></div>
+        </div>
+        <div class="bet-amount"><div class="amt">¥${Number(st.stake).toFixed(2)}</div><div class="lbl">购买金额</div></div>
+      </div>`).join("");
+    return `<div class="plan">
+      <div class="plan-head">
+        <div class="plan-title">${esc(o.home_team||"")} vs ${esc(o.away_team||"")} · 单场三选全覆盖</div>
+        <span class="tag ${pnl>0?"good":"warn"}">${pnl>0?"稳赚机会":(pnl===0?"保本":"亏损")}</span>
+        <span class="tag good">覆盖${r.coverage_status||o.coverage_status}</span>
+        <div class="plan-meta">
+          <span>总投入 <b>¥${Number(o.total_stake??r.total_stake).toFixed(2)}</b></span>
+          <span>Σ(1/赔率) <b>${r.sum_inv}</b></span>
+        </div>
+      </div>
+      <div class="list-body">${bets}</div>
+      <div class="plan-foot">
+        <div class="pnl-box"><div class="k">最差净盈亏（任意赛果）</div>
+          <div class="v ${pnlCls}">${pnl>=0?"+":""}${pnl.toFixed(2)} 元</div>
+          <div class="pnl-note">买齐${(r.stake_plan||[]).length}向后 · 含返点</div></div>
+        <div class="pnl-box"><div class="k">最差收益率</div>
+          <div class="v ${pnlCls}">${Number(o.roi??r.roi).toFixed(2)}%</div>
+          <div class="pnl-note">Σinv=${r.sum_inv} ${pnl>0?"&lt;1：所有赛果都赚":"≥1：无套利"}</div></div>
+        <div class="pnl-box" style="min-width:180px"><div class="k">覆盖核验</div>
+          <div class="v" style="font-size:14px">${(o.covered_states||r.covered_states||[]).length} / ${(r.states||[]).length} 态覆盖</div>
+          <div class="pnl-note">未覆盖：${(o.uncovered_states||r.uncovered_states||[]).join(",")||"无"}</div></div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+document.querySelectorAll(".tab").forEach(t=>{
+  t.addEventListener("click",()=>{
+    if(t.dataset.view){
+      view=t.dataset.view;
+      document.querySelectorAll(".tab").forEach(x=>x.classList.remove("active")); t.classList.add("active");
+      if(view==="single"){ loadSingle(); } else { render(); }
+    }
+  });
+});
+setInterval(()=>{document.getElementById("clock").textContent=new Date().toLocaleTimeString();},1000);
+// 自动刷新：真实模式下每 10 秒重拉方案（演示模式不打断）
+setInterval(()=>{ if(!demoMode){ loadReal(); } },10000);
+// URL 直达参数：?view=single|parlay2|parlay3  ?demo=1 直接演示模式
+(function(){
+  const qp = new URLSearchParams(location.search);
+  const v = qp.get("view");
+  if(v==="single"||v==="parlay3"||v==="parlay2"){
+    view = v;
+    document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("active", x.dataset.view===v));
+  }
+  if(qp.get("demo")==="1"){ loadDemo(); }
+  else { loadReal(); }
+})();
+</script>
+</body>
+</html>

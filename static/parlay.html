@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>投注单工作台 · 多串1过关 · 足球对冲 P0</title>
+<style>
+:root{
+  --bg:#0B0E12; --bg2:#10141A; --bg3:#151A21;
+  --surface1:rgba(255,255,255,.035); --surface2:rgba(255,255,255,.06);
+  --line:rgba(255,255,255,.08); --line2:rgba(255,255,255,.05);
+  --txt:#F2F4F7; --muted:#8E98A7; --muted2:#5E6A7B;
+  --cyan:#38e0c8; --blue:#4b8df8; --indigo:#7b8cff; --violet:#b570ff;
+  --good:#3ddc97; --bad:#fb7d86; --warn:#fcc44d;
+  --good-bg:rgba(61,220,151,.1); --bad-bg:rgba(251,125,134,.1);
+  --warn-bg:rgba(252,196,77,.1);
+  --nav-bg:rgba(15,19,25,.72); --shadow:0 20px 50px -16px rgba(0,0,0,.72);
+  --mono:ui-monospace,"JetBrains Mono",Consolas,Menlo,monospace;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--txt);font-family:var(--sans);font-size:14px;line-height:1.6}
+button{font-family:inherit;cursor:pointer}
+::selection{background:var(--indigo);opacity:.35}
+.navbar{position:sticky;top:0;z-index:50;background:var(--nav-bg);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.nav-inner{max-width:1480px;margin:0 auto;display:flex;align-items:center;gap:20px;padding:0 26px;height:56px}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),var(--violet));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#fff}
+.nav-links{display:flex;gap:4px;margin-left:auto}
+.nav-links a{padding:8px 14px;border-radius:8px;font-size:13px;color:var(--muted);transition:all .2s;text-decoration:none}
+.nav-links a:hover,.nav-links a.active{color:var(--txt);background:var(--surface2)}
+.wrap{max-width:1480px;margin:0 auto;padding:20px 26px;display:grid;grid-template-columns:1fr 420px;gap:20px;min-height:calc(100vh - 56px)}
+@media(max-width:1024px){.wrap{grid-template-columns:1fr}}
+.panel{background:var(--bg2);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.panel-hd{padding:14px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.panel-hd h2{font-size:16px;margin:0;font-weight:700}
+.source-badge{font-size:11px;padding:3px 10px;border-radius:12px;background:rgba(61,220,151,.12);color:var(--good)}
+.filters{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
+.mt-btn{padding:5px 12px;border-radius:6px;font-size:11.5px;border:1px solid var(--line);background:transparent;color:var(--muted);transition:all .15s}
+.mt-btn:hover,.mt-btn.active{background:var(--blue);border-color:var(--blue);color:#fff}
+.src-btn{padding:5px 12px;border-radius:6px;font-size:11.5px;border:1px solid var(--cyan);background:transparent;color:var(--cyan);transition:all .15s}
+.src-btn:hover,.src-btn.active{background:rgba(56,224,200,.15)}
+.reset-btn{padding:5px 12px;border-radius:6px;font-size:11px;border:1px solid var(--bad);background:transparent;color:var(--bad);transition:all .15s}
+.reset-btn:hover{background:rgba(251,125,134,.12)}
+.sep{width:1px;height:20px;background:var(--line);margin:0 4px}
+.match-list{max-height:calc(100vh - 260px);overflow-y:auto}
+.match-card{border-bottom:1px solid var(--line2)}
+.match-hdr{padding:12px 20px;cursor:pointer;display:flex;align-items:center;gap:8px;flex-wrap:wrap;transition:background .15s}
+.match-hdr:hover{background:var(--surface1)}
+.match-name{font-size:14px;font-weight:700}
+.match-comp{font-size:11px;color:var(--muted2);padding:2px 8px;background:var(--surface2);border-radius:4px}
+.match-ko{font-size:11px;color:var(--muted2);margin-left:auto}
+.live-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(251,125,134,.15);color:var(--bad);font-weight:700}
+.pick-badge{font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(56,224,200,.15);color:var(--cyan)}
+.match-body{padding:8px 20px 16px;background:var(--surface1)}
+.mkt-group{margin-bottom:10px}
+.mkt-label{font-size:11px;color:var(--muted2);font-weight:700;margin-bottom:6px;text-transform:uppercase}
+.mkt-odds{display:flex;gap:6px;flex-wrap:wrap}
+.sel-btn{padding:6px 12px;border-radius:6px;background:var(--bg2);border:1px solid var(--line2);color:var(--txt);font-size:13px;text-align:center;transition:all .12s}
+.sel-btn:hover{border-color:var(--blue);background:rgba(75,141,248,.08)}
+.sel-btn.picked{border-color:var(--cyan);background:rgba(56,224,200,.12);color:var(--cyan);font-weight:700}
+.sel-label{display:block;font-size:11px;color:var(--muted2);margin-bottom:2px}
+.sel-odds{display:block;font-size:15px;font-weight:800;font-family:var(--mono)}
+.ticket{padding:18px 20px}
+.ticket h3{font-size:15px;margin:0 0 12px;font-weight:700}
+.ticket-line{display:flex;align-items:center;gap:10px;padding:8px 12px;margin-bottom:6px;background:var(--surface1);border-radius:8px;font-size:13px}
+.tl-name{flex:1}
+.tl-odds{font-family:var(--mono);font-weight:700;color:var(--cyan)}
+.tl-remove{color:var(--muted2);cursor:pointer;font-size:11px;padding:2px 6px}
+.tl-remove:hover{color:var(--bad)}
+.build-btn{padding:10px 20px;border-radius:8px;background:var(--cyan);color:#000;font-weight:700;border:none;margin-top:10px;width:100%;font-size:14px}
+.build-btn:hover{opacity:.9}
+.result{padding:8px 12px;margin-top:8px;background:var(--surface2);border-radius:8px;font-size:13px}
+.result.err{color:var(--bad)}
+.loading{padding:20px;text-align:center;color:var(--muted)}
+.empty,.err{padding:30px;text-align:center;color:var(--muted2)}
+.hint{padding:20px;text-align:center;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+<div class="navbar">
+  <div class="nav-inner">
+    <div class="logo">P0</div>
+    <div style="font-weight:700;font-size:15px">综合过关 · Parlay Builder</div>
+    <div class="nav-links">
+      <a href="/">Dashboard</a>
+      <a href="/parlay" class="active">Parlay</a>
+    </div>
+  </div>
+</div>
+<div class="wrap">
+  <div class="panel">
+    <div class="panel-hd">
+      <h2>选择投注项</h2>
+      <span class="source-badge" id="source-tag">HG</span>
+      <div class="filters">
+        <label style="font-size:11px;color:var(--muted2);display:flex;align-items:center;gap:4px">
+          Limit: <input id="limit" type="number" value="30" min="5" max="200" style="width:60px;padding:3px 6px;border:1px solid var(--line);border-radius:4px;background:var(--bg);color:var(--txt);font-size:12px" onchange="retryLoad()" />
+        </label>
+        <button class="src-btn" onclick="retryLoad()" title="Reload">Reload</button>
+      </div>
+    </div>
+    <div id="filter-bar" style="padding:8px 20px;border-bottom:1px solid var(--line2);display:flex;gap:6px;flex-wrap:wrap;align-items:center"></div>
+    <div id="sel-list" class="match-list">
+      <div class="loading">Loading...</div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-hd"><h2>投注单 · Ticket</h2></div>
+    <div id="ticket" class="ticket">
+      <p class="hint">Click odds buttons above to build your parlay.</p>
+    </div>
+  </div>
+</div>
+<script>
+// V2 - Dynamic parlay with all market types
+var STATE = {
+  selections: [],
+  marketTypes: [],
+  picked: {},
+  current: "",
+  limit: 30,
+  source: "HG",
+  filterMarket: ""
+};
+
+function $(id) { return document.getElementById(id); }
+
+async function loadSelections() {
+  var url = "/api/v1/parlay/hg-selections?limit=" + STATE.limit;
+  $("sel-list").innerHTML = '<div class="loading">Loading HG matches...</div>';
+  try {
+    var r = await fetch(url);
+    var d = await r.json();
+    STATE.selections = d.selections || [];
+    STATE.marketTypes = [];
+    var seen = {};
+    for (var i = 0; i < STATE.selections.length; i++) {
+      var mt = STATE.selections[i].market_type;
+      if (!seen[mt]) { seen[mt] = true; STATE.marketTypes.push(mt); }
+    }
+    buildFilterBar();
+    renderSelections();
+  } catch(e) {
+    $("sel-list").innerHTML = '<div class="err">Loading error: ' + e.message + '</div>';
+  }
+}
+
+function retryLoad() {
+  STATE.limit = parseInt($("limit").value) || 30;
+  loadSelections();
+}
+
+function buildFilterBar() {
+  var html = '<button class="mt-btn active" onclick="filterMarket(\'\')">ALL (' + STATE.selections.length + ')</button>';
+  for (var i = 0; i < STATE.marketTypes.length; i++) {
+    var mt = STATE.marketTypes[i];
+    var count = 0;
+    for (var j = 0; j < STATE.selections.length; j++) {
+      if (STATE.selections[j].market_type === mt) count++;
+    }
+    html += ' <button class="mt-btn" onclick="filterMarket(\'' + mt + '\')">' + mt + ' (' + count + ')</button>';
+  }
+  html += ' <span class="sep"></span>';
+  html += '<button class="reset-btn" onclick="clearPicks()" title="Clear all picks">Clear (' + Object.keys(STATE.picked).length + ')</button>';
+  $("filter-bar").innerHTML = html;
+}
+
+function filterMarket(mt) {
+  STATE.filterMarket = mt;
+  var btns = $("filter-bar").querySelectorAll(".mt-btn");
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove("active");
+  if (mt === "") { btns[0] && btns[0].classList.add("active"); }
+  else {
+    for (var i = 0; i < btns.length; i++) {
+      if (btns[i].textContent.indexOf(mt) === 0) { btns[i].classList.add("active"); break; }
+    }
+  }
+  renderSelections();
+}
+
+function clearPicks() {
+  STATE.picked = {};
+  renderSelections();
+  renderTicket();
+}
+
+function escHtml(s) {
+  if (!s) return "";
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function renderSelections() {
+  var sel = STATE.selections;
+  var filter = STATE.filterMarket;
+  var matches = {};
+  var matchOrder = [];
+  for (var i = 0; i < sel.length; i++) {
+    var s = sel[i];
+    if (filter && s.market_type !== filter) continue;
+    var mid = s.match_id;
+    if (!matches[mid]) {
+      matches[mid] = { match: s, items: [] };
+      matchOrder.push(mid);
+    }
+    matches[mid].items.push(s);
+  }
+  
+  var html = "";
+  for (var i = 0; i < matchOrder.length; i++) {
+    var mid = matchOrder[i];
+    var m = matches[mid];
+    var isOpen = STATE.current === mid;
+    var pickedCount = 0;
+    for (var j = 0; j < m.items.length; j++) {
+      if (STATE.picked[m.items[j].selection_id]) pickedCount++;
+    }
+    html += '<div class="match-card">';
+    html += '<div class="match-hdr" onclick="toggleMatch(\'' + mid + '\')">';
+    html += '<span class="match-name">' + escHtml(m.match.match_name) + '</span>';
+    html += '<span class="match-comp">' + escHtml(m.match.competition) + '</span>';
+    html += '<span class="match-ko">' + escHtml(m.match.kickoff_time) + '</span>';
+    if (m.match.running) html += ' <span class="live-badge">LIVE</span>';
+    if (pickedCount) html += ' <span class="pick-badge">' + pickedCount + '</span>';
+    html += '</div>';
+    
+    if (isOpen) {
+      html += '<div class="match-body">';
+      var groups = {};
+      for (var j = 0; j < m.items.length; j++) {
+        var si = m.items[j];
+        var mt = si.market_type;
+        if (!groups[mt]) groups[mt] = [];
+        groups[mt].push(si);
+      }
+      for (var mt in groups) {
+        var display = groups[mt][0].market_display || mt;
+        html += '<div class="mkt-group"><div class="mkt-label">' + escHtml(display) + '</div>';
+        html += '<div class="mkt-odds">';
+        for (var k = 0; k < groups[mt].length; k++) {
+          var si = groups[mt][k];
+          var isPicked = !!STATE.picked[si.selection_id];
+          var cls = 'sel-btn' + (isPicked ? ' picked' : '');
+          html += '<button class="' + cls + '" onclick="pickSel(\'' + si.selection_id + '\')" title="' + escHtml(si.selection_name) + '">';
+          html += '<span class="sel-label">' + escHtml(si.selection_name) + '</span>';
+          html += '<span class="sel-odds">@' + si.odds + '</span>';
+          html += '</button>';
+        }
+        html += '</div></div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  $("sel-list").innerHTML = html || '<div class="empty">No selections. Try different filter.</div>';
+}
+
+function toggleMatch(mid) {
+  STATE.current = STATE.current === mid ? "" : mid;
+  renderSelections();
+}
+
+function pickSel(sid) {
+  if (STATE.picked[sid]) {
+    delete STATE.picked[sid];
+  } else {
+    STATE.picked[sid] = true;
+  }
+  renderSelections();
+  renderTicket();
+  buildFilterBar();
+}
+
+function findSel(sid) {
+  for (var i = 0; i < STATE.selections.length; i++) {
+    if (STATE.selections[i].selection_id === sid) return STATE.selections[i];
+  }
+  return null;
+}
+
+function renderTicket() {
+  var ids = Object.keys(STATE.picked);
+  var html = '<h3>Ticket (' + ids.length + ' picks)</h3>';
+  if (ids.length === 0) {
+    html += '<p class="hint">Click odds buttons above to build your parlay.</p>';
+  } else {
+    for (var i = 0; i < ids.length; i++) {
+      var s = findSel(ids[i]);
+      if (!s) continue;
+      html += '<div class="ticket-line">';
+      html += '<span class="tl-name">' + escHtml(s.selection_name) + '</span>';
+      html += '<span class="tl-odds">@' + s.odds + '</span>';
+      html += '<span class="tl-remove" onclick="unpick(\'' + ids[i] + '\')">X</span>';
+      html += '</div>';
+    }
+    html += '<button class="build-btn" onclick="buildParlay()">Build / Validate Parlay</button>';
+  }
+  $("ticket").innerHTML = html;
+}
+
+function unpick(sid) {
+  delete STATE.picked[sid];
+  renderSelections();
+  renderTicket();
+  buildFilterBar();
+}
+
+async function buildParlay() {
+  var ids = Object.keys(STATE.picked);
+  if (ids.length < 2) { alert("Need at least 2 picks"); return; }
+  
+  // Build selection objects for backend
+  var selObjs = [];
+  for (var i = 0; i < ids.length; i++) {
+    var s = findSel(ids[i]);
+    if (!s) continue;
+    selObjs.push({
+      selection_id: s.selection_id,
+      match_id: s.match_id,
+      match_name: s.match_name,
+      competition: s.competition,
+      kickoff_time: s.kickoff_time,
+      market_type: s.market_type,
+      market_line: s.market_line || "",
+      selection_code: s.selection_code,
+      selection_name: s.selection_name,
+      odds: String(s.odds),
+      source: s.source
+    });
+  }
+  
+  $("ticket").innerHTML += '<div class="loading">Validating...</div>';
+  try {
+    var r = await fetch("/api/v1/parlay/validate", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({slip_json: {selections: selObjs, source: STATE.source}})
+    });
+    var d = await r.json();
+    renderTicketResult(d);
+  } catch(e) {
+    $("ticket").innerHTML += '<div class="err">Validation error: ' + e.message + '</div>';
+  }
+}
+
+function renderTicketResult(d) {
+  var ids = Object.keys(STATE.picked);
+  var html = '<h3>Ticket (' + ids.length + ' picks)</h3>';
+  for (var i = 0; i < ids.length; i++) {
+    var s = findSel(ids[i]);
+    if (!s) continue;
+    html += '<div class="ticket-line"><span class="tl-name">' + escHtml(s.selection_name) + '</span><span class="tl-odds">@' + s.odds + '</span></div>';
+  }
+  if (d) {
+    html += '<div class="result"><b>Status:</b> ' + escHtml(d.status || "N/A") + '</div>';
+    html += '<div class="result"><b>Slip ID:</b> ' + escHtml(d.slip_id || "N/A") + '</div>';
+    html += '<div class="result"><b>Selections valid:</b> ' + (d.selections ? d.selections.filter(function(s){return s.is_valid}).length : "?") + '/' + ids.length + '</div>';
+  } else {
+    html += '<div class="result err">No response from server</div>';
+  }
+  $("ticket").innerHTML = html;
+}
+
+window.onload = function() {
+  $("limit").value = STATE.limit;
+  loadSelections();
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+version: '3.8'
+services:
+  hedge-p0:
+    build: .
+    ports:
+      - "8030:8030"
+    environment:
+      - HG_USERNAME=ximeimei1
+      - HG_PASSWORD=Aa123456
+    volumes:
+      - ./runtime:/app/runtime
+      - ./data:/app/data
+    restart: unless-stopped

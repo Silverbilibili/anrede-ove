@@ -1,0 +1,23 @@
+{
+  "name": "HG",
+  "enabled": true,
+  "transport": "cdp-direct",
+  "use_proxy": false,
+  "require_v2": false,
+  "cdp_url": "http://127.0.0.1:9222",
+  "page_url": "https://www.hga050.com/",
+  "page_hosts": [
+    "hga050.com",
+    "hga039.com",
+    "hga030.com",
+    "mos033.com",
+    "crw066.com"
+  ],
+  "data_hosts": [
+    "hga050.com",
+    "crw066.com"
+  ],
+  "transform_paths": [
+    "/transform.php"
+  ]
+}

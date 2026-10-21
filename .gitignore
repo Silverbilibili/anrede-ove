@@ -1,0 +1,49 @@
+# ---- runtime / sensitive ----
+runtime/
+*.log
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+hg_uid.txt
+hg_ver.txt
+hg_post_template.txt
+.DS_Store
+
+# ---- scratch / debug temp (this session) ----
+_*.py
+_*.txt
+_*.js
+_*.json
+*.txt.tmp
+
+# ---- backups ----
+_backup_*/
+_backup_hg/
+v2.1_backup/
+_p08_failed_restore/
+_backup_p08_realtime/
+_backup_p0_fix_*/
+
+# ---- raw dumps ----
+hg_raw_*.xml
+league_list_*.txt
+leaf_parsed.json
+
+# ---- env / deploy ----
+.env
+*.key
+_*.html
+_*.xml
+_*.css
+
+# ---- data / dbs / patch snapshots ----
+data/
+*.db
+*.sqlite
+*.sqlite3
+FH_P08_HG_REALTIME/
+P08_HG_REAL_PROJECT_PATCH/
+*.pid
+*_raw_now.xml
+

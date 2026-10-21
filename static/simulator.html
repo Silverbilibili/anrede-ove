@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>变盘模拟器 · 足球对冲 P0.8</title>
+<style>
+  :root{--bg:#0f172a;--card:#1e293b;--line:#334155;--txt:#e2e8f0;--sub:#94a3b8;
+        --red:#ef4444;--green:#22c55e;--amber:#f59e0b;--tc:#6366f1;--opp:#06b6d4;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--txt);font-family:"Microsoft YaHei","PingFang SC",sans-serif;padding:20px;}
+  .wrap{max-width:960px;margin:0 auto;}
+  h1{font-size:22px;font-weight:700;letter-spacing:.5px;}
+  .sub{font-size:12px;color:var(--sub);margin:6px 0 16px;line-height:1.6;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;}
+  .card h2{font-size:13px;font-weight:700;color:#cbd5e1;margin-bottom:10px;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .leg{flex:1;min-width:220px;background:#0f172a;border:1px solid var(--line);border-radius:8px;padding:10px 12px;}
+  .leg .name{font-size:12px;font-weight:700;}
+  .leg .src{font-size:10px;color:var(--sub);margin:2px 0 6px;}
+  .leg input[type=range]{width:100%;accent-color:#3b82f6;}
+  .leg .val{font-size:20px;font-weight:800;font-family:Consolas,monospace;}
+  .leg .odds-val{color:#f8fafc;}
+  .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:8px;}
+  .meta .kv{font-size:11px;color:var(--sub);}
+  .meta input[type=range]{width:90px;accent-color:#f59e0b;vertical-align:middle;}
+  .gauge{position:relative;height:26px;background:#0f172a;border:1px solid var(--line);border-radius:6px;overflow:hidden;margin:8px 0 4px;}
+  .gauge .fill{position:absolute;top:0;bottom:0;transition:left .08s linear,width .08s linear;}
+  .gauge .mark1{position:absolute;top:0;bottom:0;left:50%;width:1px;background:var(--line);}
+  .gauge .lbl{position:absolute;top:50%;transform:translateY(-50%);right:8px;font-size:12px;font-weight:800;}
+  .status{font-size:14px;font-weight:800;padding:6px 12px;border-radius:8px;display:inline-block;}
+  .st-red{background:rgba(239,68,68,.15);color:var(--red);border:1px solid var(--red);}
+  .st-green{background:rgba(34,197,94,.15);color:var(--green);border:1px solid var(--green);}
+  .st-amber{background:rgba(245,158,11,.15);color:var(--amber);border:1px solid var(--amber);}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th,td{padding:7px 8px;text-align:left;border-bottom:1px solid var(--line);}
+  th{color:var(--sub);font-weight:600;font-size:11px;}
+  td.num{font-family:Consolas,monospace;}
+  .pos{color:var(--green);} .neg{color:var(--red);} .zero{color:var(--amber);}
+  .hint{font-size:11.5px;color:var(--sub);line-height:1.8;margin-top:8px;}
+  .hint b{color:#f8fafc;}
+  .breakline{background:rgba(245,158,11,.1);border-left:3px solid var(--amber);padding:8px 12px;font-size:12px;color:#fcd34d;line-height:1.7;border-radius:0 6px 6px 0;margin-top:8px;}
+  a{color:#93c5fd;text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  .back{font-size:12px;color:var(--sub);margin-bottom:8px;display:inline-block;}
+  .legend{font-size:11px;color:var(--sub);display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;}
+  .legend span{display:inline-flex;align-items:center;gap:4px;}
+  .dot{width:10px;height:10px;border-radius:2px;display:inline-block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← 返回机会中心</a>
+  <h1>变盘模拟器</h1>
+  <div class="sub">基于 <b style="color:#f8fafc;">哈萨克 vs 法罗群岛</b>（今晚 22:00 开赛）当前真实报价：TC 平 2.85 · Betfair 主 2.7 · LeoVegas 客 3.3。<br>
+  拖动任一赔率 = 模拟该平台变盘，实时看 Σ 是否 &lt;1（破线），破线后自动给出「各买多少 · 最差赚多少」。</div>
+
+  <div class="card">
+    <h2>① 三条腿赔率（拖动变盘）</h2>
+    <div class="row">
+      <div class="leg">
+        <div class="name" style="color:var(--tc);">TC 平局（竞彩）</div>
+        <div class="src">P0 主源 · 返点 5%</div>
+        <input type="range" id="tcDraw" min="2.50" max="3.50" step="0.05" value="2.85">
+        <div class="val"><span class="odds-val" id="tcDrawV">2.85</span></div>
+      </div>
+      <div class="leg">
+        <div class="name" style="color:var(--opp);">外围 主胜（Betfair）</div>
+        <div class="src">Odds API · 返水 0.5%</div>
+        <input type="range" id="oppHome" min="2.30" max="3.20" step="0.05" value="2.70">
+        <div class="val"><span class="odds-val" id="oppHomeV">2.70</span></div>
+      </div>
+      <div class="leg">
+        <div class="name" style="color:var(--opp);">外围 客胜（LeoVegas）</div>
+        <div class="src">Odds API · 返水 0.5%</div>
+        <input type="range" id="oppAway" min="2.80" max="4.00" step="0.05" value="3.30">
+        <div class="val"><span class="odds-val" id="oppAwayV">3.30</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>② 资金参数</h2>
+    <div class="meta">
+      <div class="kv">TC 返点 <b id="rbTcV">5</b>% <input type="range" id="rbTc" min="0" max="8" step="0.5" value="5"></div>
+      <div class="kv">外围返水 <b id="rbOppV">0.5</b>% <input type="range" id="rbOpp" min="0" max="2" step="0.1" value="0.5"></div>
+      <div class="kv">预算 <b id="budgetV">1000</b> 元 <input type="range" id="budget" min="100" max="5000" step="100" value="1000"></div>
+      <div class="kv">步长 <b id="stepV">1</b> 元 <input type="range" id="step" min="1" max="10" step="1" value="1"></div>
+      <div class="kv">最低注 <b id="minV">1</b> 元 <input type="range" id="minstake" min="1" max="10" step="1" value="1"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>③ 实时判定</h2>
+    <div id="statusBox"></div>
+    <div class="gauge" id="gauge">
+      <div class="fill" id="gaugeFill"></div>
+      <div class="mark1"></div>
+      <div class="lbl" id="gaugeLbl"></div>
+    </div>
+    <div class="hint" id="breakHint"></div>
+    <div id="planBox"></div>
+    <div class="hint" id="formula"></div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--tc)"></span> TC 竞彩腿</span>
+      <span><span class="dot" style="background:var(--opp)"></span> 外围腿</span>
+      <span><span class="dot" style="background:var(--green)"></span> Σ&lt;1 = 有套利</span>
+      <span><span class="dot" style="background:var(--red)"></span> Σ≥1 = 无套利</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  function $(id){return document.getElementById(id);}
+  function cents(x){return Math.round(x*100);}
+  function yuan(c){return (c/100).toFixed(2);}
+
+  function read(){
+    return {
+      tcDraw: parseFloat($("tcDraw").value),
+      oppHome: parseFloat($("oppHome").value),
+      oppAway: parseFloat($("oppAway").value),
+      rbTc: parseFloat($("rbTc").value)/100,
+      rbOpp: parseFloat($("rbOpp").value)/100,
+      budget: parseFloat($("budget").value),
+      step: parseFloat($("step").value),
+      minstake: parseFloat($("minstake").value)
+    };
+  }
+  function display(p){
+    $("tcDrawV").textContent = p.tcDraw.toFixed(2);
+    $("oppHomeV").textContent = p.oppHome.toFixed(2);
+    $("oppAwayV").textContent = p.oppAway.toFixed(2);
+    $("rbTcV").textContent = (p.rbTc*100).toFixed(1);
+    $("rbOppV").textContent = (p.rbOpp*100).toFixed(1);
+    $("budgetV").textContent = p.budget.toFixed(0);
+    $("stepV").textContent = p.step.toFixed(0);
+    $("minV").textContent = p.minstake.toFixed(0);
+  }
+
+  function buildPlan(p){
+    var legs = [
+      {name:"TC 平局", src:"竞彩", odds:p.tcDraw, rb:p.rbTc},
+      {name:"外围 主胜", src:"Betfair", odds:p.oppHome, rb:p.rbOpp},
+      {name:"外围 客胜", src:"LeoVegas", odds:p.oppAway, rb:p.rbOpp}
+    ];
+    var inv = legs.map(function(l){return 1/l.odds;});
+    var sum = inv.reduce(function(a,b){return a+b;},0);
+    var out = {sum:sum, legs:legs, plan:null, feasible:sum < 1};
+    if(!out.feasible) return out;
+    // 最优比例 stake_i = budget*(1/odds_i)/sum，向下取整到 step
+    var ideal = legs.map(function(l,i){return p.budget*inv[i]/sum;});
+    var stakes = ideal.map(function(x){
+      return Math.max(p.minstake, Math.floor(x/p.step)*p.step);
+    });
+    var total = stakes.reduce(function(a,b){return a+b;},0);
+    if(total > p.budget){
+      var scale = p.budget/total;
+      stakes = stakes.map(function(s){return Math.max(p.minstake, Math.floor(s*scale/p.step)*p.step);});
+      total = stakes.reduce(function(a,b){return a+b;},0);
+    }
+    // 精确重算（分）：每个赛果的返还
+    var pnl = {};
+    var pnlTotal = 0;
+    var rebates = legs.map(function(l,i){return cents(stakes[i])*l.rb;});
+    var rebateTotal = rebates.reduce(function(a,b){return a+b;},0);
+    var totalC = cents(total);
+    var stateNames = ["主胜","平局","客胜"];
+    // 返还：主胜 -> 主胜腿中奖；平局 -> 平局腿；客胜 -> 客胜腿
+    var winIdx = {0:1, 1:0, 2:2}; // stateName idx -> leg idx (主胜->外围主, 平->TC平, 客->外围客)
+    for(var s=0;s<3;s++){
+      var li = winIdx[s];
+      var ret = cents(stakes[li])*legs[li].odds;
+      pnl[s] = ret - totalC + rebateTotal;
+      pnlTotal += pnl[s];
+    }
+    var minPnl = Math.min(pnl[0],pnl[1],pnl[2]);
+    var maxPnl = Math.max(pnl[0],pnl[1],pnl[2]);
+    var covered = pnl.map(function(v){return v>0;});
+    out.plan = {stakes:stakes, total:total, pnl:pnl, minPnl:minPnl, maxPnl:maxPnl,
+                rebateTotal:rebateTotal, covered:covered,
+                roi: total>0 ? minPnl/total*100 : 0};
+    return out;
+  }
+
+  function render(){
+    var p = read(); display(p);
+    var r = buildPlan(p);
+    var sum = r.sum;
+    var status = $("statusBox");
+    var gaugeFill = $("gaugeFill");
+    // gauge: 0.90 ~ 1.10 区间
+    var pos = Math.max(0, Math.min(1, (sum-0.90)/0.20));
+    gaugeFill.style.left = (pos*50)+"%";
+    gaugeFill.style.width = ((1-pos)*50)+"%";
+    gaugeFill.style.background = sum<1 ? "rgba(34,197,94,.55)" : "rgba(239,68,68,.55)";
+    $("gaugeLbl").textContent = "Σ = " + sum.toFixed(4);
+
+    if(r.feasible){
+      status.innerHTML = '<span class="status st-green">✓ 破线 · 有套利（返奖率 ' + (100/sum*100).toFixed(1) + '%）</span>';
+    } else {
+      status.innerHTML = '<span class="status st-red">✗ 无套利（Σ ≥ 1）</span>';
+    }
+
+    // 破线提示：每条腿升到多少可单独破线（其余两腿不变）
+    var legs = r.legs;
+    var lines = [];
+    for(var i=0;i<3;i++){
+      var others = [0,1,2].filter(function(j){return j!==i;});
+      var otherSum = others.reduce(function(a,j){return a+1/legs[j].odds;},0);
+      // 需要 1/odds_i_new + otherSum < 1 => odds_i_new > 1/(1-otherSum)
+      var need = 1/(1-otherSum);
+      if(need > 0 && isFinite(need) && need > legs[i].odds && need < 99){
+        lines.push("把 <b>" + legs[i].name + "</b>（" + legs[i].src + "）从 " + legs[i].odds.toFixed(2) +
+                   " 调到 ≥ <b style='color:#fcd34d;'>" + need.toFixed(2) + "</b> 即可破线");
+      }
+    }
+    if(lines.length){
+      $("breakHint").innerHTML = '<div class="breakline">破线方向：' + lines.join("　｜　") + "</div>";
+    } else {
+      $("breakHint").innerHTML = "";
+    }
+
+    var planBox = $("planBox");
+    if(r.plan){
+      var pl = r.plan;
+      var rows = "";
+      for(var i=0;i<3;i++){
+        var nm = ["主胜","平局","客胜"][i];
+        rows += "<tr><td>" + nm + "</td><td class='num'>" + yuan(pl.pnl[i]) + "</td></tr>";
+      }
+      planBox.innerHTML =
+        "<table><thead><tr><th>赛果</th><th>净收益（含返点）</th></tr></thead><tbody>" + rows + "</tbody></table>" +
+        "<div class='hint' style='margin-top:8px;'>" +
+        "<b>下注方案：</b>" +
+        "TC 平局 ¥" + yuan(cents(pl.stakes[0])) + "（返还 " + (pl.stakes[0]*legs[0].odds).toFixed(0) + "）｜" +
+        "Betfair 主胜 ¥" + yuan(cents(pl.stakes[1])) + "（返还 " + (pl.stakes[1]*legs[1].odds).toFixed(0) + "）｜" +
+        "LeoVegas 客胜 ¥" + yuan(cents(pl.stakes[2])) + "（返还 " + (pl.stakes[2]*legs[2].odds).toFixed(0) + "）<br>" +
+        "总投入 <b>¥" + yuan(cents(pl.total)) + "</b> · 返点合计 ¥" + yuan(pl.rebateTotal) +
+        " · <b style='color:" + (pl.minPnl>0?"var(--green)":"var(--amber)") + ";'>最差净赚 ¥" + yuan(pl.minPnl) + "</b>" +
+        " · 最好净赚 ¥" + yuan(pl.maxPnl) + " · ROI " + pl.roi.toFixed(2) + "%<br>" +
+        "覆盖状态：" + (pl.covered.every(Boolean) ? "<span class='pos'>三态全覆盖</span>" : "<span class='neg'>存在未覆盖赛果（风险敞口）</span>") +
+        "</div>";
+    } else {
+      var gap = (sum-1)*100;
+      planBox.innerHTML = "";
+      $("breakHint").innerHTML =
+        '<div class="breakline">还差 <b style="color:#fcd34d;">' + gap.toFixed(2) + '%</b> 破线（Σ 需 &lt; 1）。' +
+        (lines.length ? "当前最可行的变盘方向见上。" : "把任一条腿赔率大幅拉高，或等 TC 实际变盘。") + "</div>";
+    }
+
+    $("formula").innerHTML =
+      "公式：Σ = 1/" + legs[0].odds.toFixed(2) + " + 1/" + legs[1].odds.toFixed(2) + " + 1/" + legs[2].odds.toFixed(2) +
+      " = " + sum.toFixed(4) + "　（返奖率 = 1/Σ = " + (100/sum).toFixed(1) + "%" +
+      (sum<1 ? "，&gt;100% 有套利" : "，&lt;100% 无套利") + "）";
+  }
+
+  ["tcDraw","oppHome","oppAway","rbTc","rbOpp","budget","step","minstake"].forEach(function(id){
+    $(id).addEventListener("input", render);
+  });
+  render();
+})();
+</script>
+</body>
+</html>

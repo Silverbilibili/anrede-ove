@@ -1,0 +1,100 @@
+{
+  "config_version": 5,
+  "sources": [
+    {
+      "name": "TC",
+      "enabled": true,
+      "mode": "tc_public_api_fb",
+      "api_base": "https://webapi.sporttery.cn",
+      "url": "https://webapi.sporttery.cn/gateway/uniform/fb/getMatchDataPageListV1.qry?method=concern",
+      "timeout_seconds": 20,
+      "headers": {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
+        "Referer": "https://m.sporttery.cn/mjc/zqsj/?tab=concern",
+        "Accept": "application/json"
+      },
+      "rebate_rate": "0",
+      "note": "2026-10-06 实测：football 路径 getMatchCalculatorV1 被 EdgeOne 风控（225 空壳/拦截页）；改用 fb 路径双接口（getMatchDataPageListV1 赛程 + getMatchGeneral 单场赔率），本机直连可用。仅采 matchStatus=2（已开售）比赛。"
+    },
+    {
+      "name": "HG",
+      "enabled": false,
+      "mode": "hg_cdp",
+      "page_url": "",
+      "cdp_url": "",
+      "page_wait_seconds": 8,
+      "extract_js": "",
+      "timeout_seconds": 30,
+      "rebate_rate": "0.005",
+      "note": "2026-10-06 骨架已就绪：CDP 浏览器通道（backend/collector/cdp_client.py）+ hg_cdp 采集模式。启用前需要：①AdsPower 量化对冲研究浏览器（HG 登录态）启动并开 CDP 端口；②确认 HG 页面 URL 与 DOM 结构后把 extract_js（返回赔率 JSON 数组）填入。不要把账号密码写入此文件。"
+    },
+    {
+      "name": "DAFABET",
+      "enabled": false,
+      "mode": "dafabet_cdp",
+      "page_url": "https://sports.dafabet.com/en/sports/240-FOOT",
+      "adspower_user_id": "k1ho30ir",
+      "page_wait_seconds": 15,
+      "attempts": 4,
+      "resident": true,
+      "poll_seconds": 10,
+      "reload_every": 8,
+      "timeout_seconds": 60,
+      "rebate_rate": "0",
+      "note": "2026-10-06 驻留模式：浏览器启动一次保持，每 10 秒读 DOM（哈希对比，变化才入库），每 8 次重导航兜底；TC 报价变化会即时触发一次读取（poke 联动，缩短套利窗口）。冷启动采集模式（attempts 重试）保留作 fallback。需 v2rayN 全局代理或可用网络环境。AdsPower 免费版每日启动配额 2026-10-06 14:38 耗尽（约 21h 恢复），配额期间此源自动降级为不可用，不阻塞系统。"
+    },
+    {
+      "name": "ODDSAPI",
+      "enabled": false,
+      "mode": "oddsapi",
+      "api_key_env": "ODDS_API_KEY",
+      "proxy": "http://127.0.0.1:10808",
+      "sport": "soccer",
+      "regions": "eu",
+      "markets": "h2h",
+      "interval_s": 60,
+      "rebate_rate": "0",
+      "note": "The Odds API（公开 JSON，免费 500 请求/月）：soccer 全联赛 h2h（1X2），赔率取各家博彩公司最高价（best price）。需在 https://the-odds-api.com 注册免费 key，配置为环境变量 ODDS_API_KEY 后启用；无 key 时自动 disabled 不阻塞系统。走 v2rayN 10808 代理出境。"
+    },
+    {
+      "name": "BETEXPLORER",
+      "enabled": false,
+      "mode": "betexplorer",
+      "proxy": "http://127.0.0.1:10808",
+      "interval_s": 600,
+      "rebate_rate": "0",
+      "note": "参考源（默认关闭）：免费无登录，未来比赛列表（队名/时间/详情链接）辅助跨源匹配；盘口出现滞后（临近开赛才出盘），不产赔率、只存原始快照，不写 matches/quotes。"
+    }
+  ],
+  "engine": {
+    "min_pnl": "0",
+    "min_roi": "0",
+    "default_budget": "1000",
+    "stake_step": "1",
+    "min_stake": "1"
+  },
+  "limits": {
+    "version": 1,
+    "platforms": {
+      "TC": {
+        "min_stake": "2",
+        "stake_step": "2",
+        "max_multiplier": 99,
+        "max_notes_per_ticket": 99,
+        "max_ticket_amount": "20000",
+        "single_bet_max": "198",
+        "note": "竞彩公开规则：单注2元起、2元步长、每注最多99倍（单笔≤198）、单张最多99注、单张金额≤2万。实际以当地彩票店为准。"
+      },
+      "HG": {
+        "min_stake": "10",
+        "max_stake": "5000",
+        "stake_step": "1",
+        "note": "外围默认（HG/DAFABET 类）：最小注10、最大注5000、步长1，按实际平台规则调整。ODDSAPI 各公司同此默认。"
+      }
+    }
+  },
+  "alert": {
+    "feishu_webhook": "",
+    "note": "可选：套利机会 / 源健康恶化时推送飞书机器人。填入群机器人 Webhook URL 即启用；留空 = 仅日志+页面。密钥类配置放包外 secrets/（见 .env.example），勿写入本文件。"
+  }
+}
